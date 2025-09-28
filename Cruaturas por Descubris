@@ -1,0 +1,91 @@
+python juego.py
+import json
+import os
+import random
+
+# Archivo donde guardaremos usuarios y progreso
+DATA_FILE = "usuarios.json"
+
+# Funciones de manejo de usuarios
+def cargar_usuarios():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def guardar_usuarios(usuarios):
+    with open(DATA_FILE, "w") as f:
+        json.dump(usuarios, f)
+
+def registrar_usuario(usuarios):
+    nombre = input("Elige tu nombre de usuario: ")
+    if nombre in usuarios:
+        print("Ese usuario ya existe.")
+        return None
+    contrasena = input("Crea tu contraseña: ")
+    usuarios[nombre] = {"password": contrasena, "monstruos": []}
+    guardar_usuarios(usuarios)
+    print(f"Usuario {nombre} registrado con éxito!")
+    return nombre
+
+def iniciar_sesion(usuarios):
+    nombre = input("Usuario: ")
+    contrasena = input("Contraseña: ")
+    if nombre in usuarios and usuarios[nombre]["password"] == contrasena:
+        print(f"Bienvenido {nombre}!")
+        return nombre
+    print("Usuario o contraseña incorrectos.")
+    return None
+
+# Funciones del juego
+MONSTRUOS = ["Flarion", "Aquarion", "Terradon", "Electrozo", "Mystik"]
+
+def capturar_monstruo(usuario, usuarios):
+    monstruo = random.choice(MONSTRUOS)
+    print(f"¡Encontraste un {monstruo}!")
+    decision = input("¿Quieres atraparlo? (si/no) ").lower()
+    if decision == "si":
+        usuarios[usuario]["monstruos"].append(monstruo)
+        guardar_usuarios(usuarios)
+        print(f"{monstruo} ha sido atrapado!")
+    else:
+        print(f"{monstruo} escapó...")
+
+def ver_monstruos(usuario, usuarios):
+    m = usuarios[usuario]["monstruos"]
+    if m:
+        print("Tus monstruos:", ", ".join(m))
+    else:
+        print("No tienes monstruos atrapados.")
+
+# Menú principal
+def main():
+    usuarios = cargar_usuarios()
+    usuario_actual = None
+
+    while not usuario_actual:
+        print("\n1. Registrarse\n2. Iniciar sesión")
+        opcion = input("Elige una opción: ")
+        if opcion == "1":
+            usuario_actual = registrar_usuario(usuarios)
+        elif opcion == "2":
+            usuario_actual = iniciar_sesion(usuarios)
+        else:
+            print("Opción inválida.")
+
+    # Juego
+    while True:
+        print("\n1. Capturar monstruo\n2. Ver monstruos\n3. Salir")
+        opcion = input("Elige una opción: ")
+        if opcion == "1":
+            capturar_monstruo(usuario_actual, usuarios)
+        elif opcion == "2":
+            ver_monstruos(usuario_actual, usuarios)
+        elif opcion == "3":
+            print("¡Hasta luego!")
+            break
+        else:
+            print("Opción inválida.")
+
+if __name__ == "__main__":
+    main()
